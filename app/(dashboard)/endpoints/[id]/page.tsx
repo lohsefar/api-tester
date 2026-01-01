@@ -7,6 +7,7 @@ import { WebhookDetail } from "@/components/webhook-detail";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getWebhookUrl } from "@/lib/webhook-url";
 
 interface Endpoint {
   id: string;
@@ -43,7 +44,9 @@ export default function EndpointPage() {
       if (res.ok) {
         const data = await res.json();
         setEndpoint(data);
-        setWebhookUrl(`${window.location.origin}/api/webhook/${data.slug}`);
+        // Use the webhook URL utility which respects NEXT_PUBLIC_WEBHOOK_BASE_URL
+        const url = getWebhookUrl(data.slug);
+        setWebhookUrl(url);
       }
     } catch (error) {
       console.error("Failed to fetch endpoint:", error);

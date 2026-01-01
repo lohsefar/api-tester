@@ -51,6 +51,14 @@ SMTP_FROM="Your Name <noreply@example.com>"
 
 # App URL
 NEXTAUTH_URL=http://localhost:3000
+
+# Webhook Base URL (optional)
+# Set this to your public domain or local IP for webhook URLs
+# If not set, will use the current browser origin
+# Examples:
+#   NEXT_PUBLIC_WEBHOOK_BASE_URL=http://192.168.1.100:3000  # Local IP
+#   NEXT_PUBLIC_WEBHOOK_BASE_URL=https://webhooks.example.com  # Production domain
+NEXT_PUBLIC_WEBHOOK_BASE_URL=
 ```
 
 3. Push database schema:

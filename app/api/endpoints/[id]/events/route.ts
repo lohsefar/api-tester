@@ -78,15 +78,17 @@ export async function GET(
               .orderBy(desc(webhooks.receivedAt));
 
             if (newWebhooks.length > 0) {
+              // Update lastCheck before sending to avoid duplicates
+              const now = new Date();
               for (const webhook of newWebhooks) {
                 sendEvent({ type: "webhook", data: webhook });
               }
-              lastCheck = new Date();
+              lastCheck = now;
             }
           } catch (error) {
             console.error("SSE polling error:", error);
           }
-        }, 1000); // Poll every second
+        }, 1000); // Poll every second for real-time updates
 
         // Cleanup on close
         request.signal.addEventListener("abort", () => {

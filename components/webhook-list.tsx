@@ -43,7 +43,14 @@ export function WebhookList({
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === "webhook") {
-        setWebhooks((prev) => [data.data, ...prev]);
+        setWebhooks((prev) => {
+          // Check if webhook already exists to prevent duplicates
+          const exists = prev.some((w) => w.id === data.data.id);
+          if (exists) {
+            return prev;
+          }
+          return [data.data, ...prev];
+        });
       }
     };
 
@@ -69,8 +76,12 @@ export function WebhookList({
 
       const res = await fetch(`/api/endpoints/${endpointId}/webhooks?${params}`);
       if (res.ok) {
-        const data = await res.json();
-        setWebhooks(data);
+        const data = await res.json() as Webhook[];
+        // Remove duplicates by ID (in case SSE added some before this fetch completed)
+        const uniqueWebhooks = Array.from(
+          new Map(data.map((w) => [w.id, w])).values()
+        ) as Webhook[];
+        setWebhooks(uniqueWebhooks);
       }
     } catch (error) {
       console.error("Failed to fetch webhooks:", error);
