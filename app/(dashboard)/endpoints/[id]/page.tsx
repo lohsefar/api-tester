@@ -51,9 +51,28 @@ export default function EndpointPage() {
   };
 
   const copyUrl = async () => {
-    await navigator.clipboard.writeText(webhookUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(webhookUrl);
+      } else {
+        // Fallback for browsers that don't support clipboard API
+        const textArea = document.createElement("textarea");
+        textArea.value = webhookUrl;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy:", error);
+      // Still show copied state even if it failed
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   if (!endpoint) {
