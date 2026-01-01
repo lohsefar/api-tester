@@ -1,36 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Webhook Tester
 
-## Getting Started
+A webhook endpoint testing tool built with Next.js. Create webhook endpoints, receive requests, and inspect them in real-time.
 
-First, run the development server:
+## Features
+
+- Create multiple webhook endpoints
+- Receive and inspect webhook requests in real-time
+- Filter webhooks by HTTP method and search content
+- View detailed request information including headers, body, and query parameters
+- Modern UI with dark/light/system theme support
+- Email/password authentication with OTP verification
+- Real-time updates via Server-Sent Events (SSE)
+- Optional authentication bypass for development
+
+## Prerequisites
+
+- Node.js 18+ or Bun
+- MariaDB/MySQL database
+- SMTP server (required only if using email authentication)
+
+## Installation
+
+1. Clone the repository and install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create `.env.local` file with the following variables:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+# Database
+MARIADB_HOST=localhost
+MARIADB_PORT=3306
+MARIADB_USER=your_user
+MARIADB_PASSWORD=your_password
+MARIADB_DATABASE=api-tester
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Auth
+AUTH_SECRET=your_random_secret_here
+DISABLE_AUTH=false
 
-## Learn More
+# SMTP (required if DISABLE_AUTH=false)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_user
+SMTP_PASSWORD=your_smtp_password
+SMTP_FROM="Your Name <noreply@example.com>"
 
-To learn more about Next.js, take a look at the following resources:
+# App URL
+NEXTAUTH_URL=http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Push database schema:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+bun run db:push
+```
 
-## Deploy on Vercel
+4. Start the development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+bun run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Open http://localhost:3000 in your browser.
+
+## Usage
+
+### With Authentication (Default)
+
+1. Register an account at `/register`
+2. Check your email for the 6-digit OTP code
+3. Verify your email at `/verify-email`
+4. Sign in at `/login`
+5. Create a webhook endpoint using the "+ New Endpoint" button
+6. Copy the generated webhook URL
+7. Send requests to the webhook URL
+8. View received webhooks in the dashboard
+
+### Without Authentication
+
+Set `DISABLE_AUTH=true` in `.env.local` to disable authentication. When authentication is disabled:
+
+- No login required - dashboard is accessible directly
+- Anonymous sessions are used to isolate data per browser
+- Each browser gets a unique session ID stored in a cookie (30-day expiration)
+- Endpoints and webhooks are isolated per browser session
+- Data persists in the database but is only accessible from the same browser
+
+**Note:** When auth is disabled, you do not need to configure SMTP settings.
+
+## API Endpoints
+
+### Public Webhook Receiver
+
+```
+POST/PUT/PATCH/DELETE/GET /api/webhook/[slug]
+```
+
+Send webhooks to this URL. All HTTP methods are supported. The webhook receiver is always public and does not require authentication.
+
+### Application APIs
+
+All application APIs require authentication (or anonymous session when auth is disabled):
+
+- `GET /api/endpoints` - List your endpoints
+- `POST /api/endpoints` - Create new endpoint
+- `GET /api/endpoints/[id]` - Get endpoint details
+- `DELETE /api/endpoints/[id]` - Delete endpoint
+- `GET /api/endpoints/[id]/webhooks` - List webhooks for endpoint (supports ?method= and ?search= query params)
+- `GET /api/endpoints/[id]/events` - SSE stream for real-time webhook updates
+
+## Development
+
+```bash
+# Run development server
+bun run dev
+
+# Build for production
+bun run build
+
+# Start production server
+bun run start
+
+# Database migrations
+bun run db:push
+```
+
+## Tech Stack
+
+- Framework: Next.js 16 (App Router)
+- Database: MariaDB/MySQL with Drizzle ORM
+- Authentication: NextAuth.js v5
+- UI Components: shadcn/ui
+- Styling: Tailwind CSS
+- Theme: next-themes
+
+## License
+
+MIT

@@ -53,8 +53,8 @@ export const verificationTokens = mysqlTable("verificationTokens", {
 export const endpoints = mysqlTable("endpoints", {
   id: varchar("id", { length: 255 }).primaryKey(),
   userId: varchar("userId", { length: 255 })
-    .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  anonymousSessionId: varchar("anonymousSessionId", { length: 255 }),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
